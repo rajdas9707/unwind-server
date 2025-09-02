@@ -61,6 +61,7 @@ router.get("/:id", async (req, res) => {
 
 // Create new journal entry for the authenticated user
 router.post("/", async (req, res) => {
+  console.log(req.body);
   try {
     const userId = req.user?.uid;
     if (!userId) return res.status(401).json({ error: "Unauthorized" });
