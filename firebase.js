@@ -12,4 +12,6 @@ admin.initializeApp({
   }),
 });
 
+console.log("Firebase admin initialized", admin);
+
 module.exports = admin;

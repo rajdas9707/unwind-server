@@ -89,10 +89,10 @@ router.post("/", async (req, res) => {
     console.log(
       `[journal] CREATED _id=${savedEntry._id} userId=${userId} date=${savedEntry.date}`
     );
-    res.status(201).json(savedEntry);
+    return res.status(201).json(savedEntry);
   } catch (error) {
     console.error(`[journal] POST error`, error);
-    res.status(500).json({ error: error.message });
+    return res.status(500).json({ error: error.message });
   }
 });
 
