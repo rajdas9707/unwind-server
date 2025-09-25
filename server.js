@@ -2,6 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const helmet = require("helmet");
+const path = require("path");
 require("dotenv").config();
 
 const app = express();
@@ -18,7 +19,24 @@ app.use(helmet());
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// Serve static Help Center
+const publicDir = path.join(__dirname, "public");
+app.use(
+  "/help-center",
+  express.static(path.join(publicDir, "help-center"), {
+    maxAge: process.env.NODE_ENV === "production" ? "1d" : 0,
+    setHeaders: (res) => {
+      res.setHeader(
+        "Cache-Control",
+        process.env.NODE_ENV === "production"
+          ? "public, max-age=86400"
+          : "no-cache"
+      );
+    },
+  })
+);
+
+// API Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/journal", verifyToken, journalRoutes);
 app.use("/api/overthinking", verifyToken, overthinkingRoutes);
@@ -70,6 +88,7 @@ connectDB().then(() => {
   app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
     console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
+    console.log(`Help Center available at /help-center`);
   });
 });
 
