@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Journal = require("../models/Journal");
+const journalController = require("../controllers/journalController");
 
 // Get all journal entries for the authenticated user
 router.get("/", async (req, res) => {
@@ -173,6 +174,63 @@ router.get("/stats", async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// ===== AI INTEGRATION ROUTES =====
+
+// Create journal entry with AI analysis
+router.post("/process", journalController.createWithAnalysis);
+
+// Analyze existing journal entry
+router.post("/:id/analyze", journalController.analyzeExisting);
+
+// Get analyzed journal entries with filtering
+router.get("/analyzed", journalController.getAnalyzedEntries);
+
+// Get AI service status
+router.get("/ai-status", journalController.getAIStatus);
+
+// Test integration (development only)
+router.post("/test-integration", journalController.testIntegration);
+
+// Store journal entry from LLM service (internal endpoint)
+router.post("/store-from-llm", async (req, res) => {
+  try {
+    const { content, date, tags, mood, userId, aiAnalysis } = req.body;
+    
+    console.log(`[journal-store-from-llm] Storing entry from LLM service - userId=${userId}`);
+    
+    // Validate required fields
+    if (!content || !date || !userId) {
+      return res.status(400).json({ error: 'Content, date, and userId are required' });
+    }
+
+    // Create journal entry with AI analysis
+    const journalEntry = new Journal({
+      userId,
+      content: content.trim(),
+      date,
+      tags: tags || [],
+      mood: mood || 'neutral',
+      aiAnalysis: aiAnalysis
+    });
+
+    const savedEntry = await journalEntry.save();
+    
+    console.log(`[journal-store-from-llm] Entry stored successfully - id=${savedEntry._id}`);
+
+    return res.status(201).json({
+      success: true,
+      data: savedEntry
+    });
+
+  } catch (error) {
+    console.error(`[journal-store-from-llm] Error storing entry:`, error);
+    return res.status(500).json({ 
+      error: 'Failed to store journal entry',
+      details: error.message 
+    });
   }
 });
 

@@ -28,6 +28,48 @@ const journalSchema = new mongoose.Schema({
   type: {
     type: String,
     default: 'journal'
+  },
+  // LLM Analysis Results
+  aiAnalysis: {
+    summary: {
+      type: [String],
+      maxlength: 5
+    },
+    sentiment: {
+      type: String,
+      enum: ['Positive', 'Negative', 'Neutral']
+    },
+    sentimentReasoning: {
+      type: String,
+      maxlength: 500
+    },
+    wrongdoingsAndSolutions: [{
+      wrongdoing: {
+        type: String,
+        required: true,
+        maxlength: 200
+      },
+      solution: {
+        type: String,
+        required: true,
+        maxlength: 300
+      }
+    }],
+    overallScore: {
+      type: Number,
+      min: 0,
+      max: 10
+    },
+    processedAt: {
+      type: Date,
+      default: Date.now
+    },
+    llmMetadata: {
+      provider: String,
+      model: String,
+      tokensUsed: Number,
+      responseTime: Number
+    }
   }
 }, {
   timestamps: true
